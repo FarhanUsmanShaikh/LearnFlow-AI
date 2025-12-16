@@ -13,9 +13,10 @@ const progressSchema = z.object({
 // POST /api/tasks/[id]/progress - Update task progress
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -23,7 +24,7 @@ export async function POST(
 
     const body = await request.json()
     const validatedData = progressSchema.parse(body)
-    const taskId = params.id
+    const taskId = id
 
     // Create progress log
     const progressLog = await createProgressLog({
@@ -48,7 +49,7 @@ export async function POST(
     console.error('Update progress error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: error.issues },
         { status: 400 }
       )
     }
@@ -62,15 +63,16 @@ export async function POST(
 // GET /api/tasks/[id]/progress - Get task progress logs
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const taskId = params.id
+    const taskId = id
     const progressLogs = await getProgressLogsByTask(taskId)
 
     return NextResponse.json({

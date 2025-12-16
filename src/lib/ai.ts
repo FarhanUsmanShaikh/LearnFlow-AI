@@ -1,8 +1,7 @@
 import { google } from '@ai-sdk/google'
 import { generateObject, generateText } from 'ai'
 import { z } from 'zod'
-import { prisma } from './prisma'
-import type { LearningTask, ProgressLog, User } from '@prisma/client'
+import { db, getProgressLogsByTask, createAIInsight, getAIInsightsByUser, type LearningTask, type ProgressLog, type InsightType } from './db'
 
 // AI Response Schemas
 const taskBreakdownSchema = z.object({
@@ -78,47 +77,21 @@ export class AIService {
       const end = endDate || new Date()
       const start = startDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
 
-      // Fetch user's progress data
-      const progressData = await prisma.progressLog.findMany({
-        where: {
-          userId,
-          createdAt: {
-            gte: start,
-            lte: end,
-          },
-        },
-        include: {
-          task: {
-            select: {
-              title: true,
-              priority: true,
-              status: true,
-              estimatedTime: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      })
+      // Fetch user's progress data with task details
+      const [progressRows] = await db.execute(`
+        SELECT pl.*, lt.title, lt.priority, lt.status, lt.estimated_time
+        FROM progress_logs pl
+        JOIN learning_tasks lt ON pl.task_id = lt.id
+        WHERE pl.user_id = ? AND pl.created_at >= ? AND pl.created_at <= ?
+        ORDER BY pl.created_at DESC
+      `, [userId, start, end]) as any[]
 
       // Get completed tasks in the period
-      const completedTasks = await prisma.learningTask.findMany({
-        where: {
-          assigneeId: userId,
-          status: 'DONE',
-          updatedAt: {
-            gte: start,
-            lte: end,
-          },
-        },
-        select: {
-          title: true,
-          priority: true,
-          estimatedTime: true,
-          actualTime: true,
-        },
-      })
+      const [completedRows] = await db.execute(`
+        SELECT title, priority, estimated_time, actual_time
+        FROM learning_tasks
+        WHERE assignee_id = ? AND status = 'DONE' AND updated_at >= ? AND updated_at <= ?
+      `, [userId, start, end]) as any[]
 
       const { object } = await generateObject({
         model: google('gemini-1.5-pro'),
@@ -127,8 +100,8 @@ export class AIService {
         
         Time Period: ${start.toDateString()} to ${end.toDateString()}
         
-        Progress Logs: ${JSON.stringify(progressData, null, 2)}
-        Completed Tasks: ${JSON.stringify(completedTasks, null, 2)}
+        Progress Logs: ${JSON.stringify(progressRows, null, 2)}
+        Completed Tasks: ${JSON.stringify(completedRows, null, 2)}
         
         Provide:
         1. Overall progress score (0-100)
@@ -154,21 +127,33 @@ export class AIService {
    */
   async generateStudySuggestions(userId: string) {
     try {
-      // Get user's recent tasks and progress
-      const recentTasks = await prisma.learningTask.findMany({
-        where: {
-          assigneeId: userId,
-          archivedAt: null,
-        },
-        include: {
-          progressLogs: {
-            orderBy: { createdAt: 'desc' },
-            take: 3,
-          },
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-      })
+      // Get user's recent tasks
+      const [taskRows] = await db.execute(`
+        SELECT * FROM learning_tasks
+        WHERE assignee_id = ? AND archived_at IS NULL
+        ORDER BY created_at DESC
+        LIMIT 10
+      `, [userId]) as any[]
+
+      // Get recent progress for these tasks
+      const taskIds = taskRows.map((task: any) => task.id)
+      let progressData: any[] = []
+      
+      if (taskIds.length > 0) {
+        const placeholders = taskIds.map(() => '?').join(',')
+        const [progressRows] = await db.execute(`
+          SELECT * FROM progress_logs
+          WHERE task_id IN (${placeholders})
+          ORDER BY created_at DESC
+          LIMIT 30
+        `, taskIds) as any[]
+        progressData = progressRows
+      }
+
+      const recentTasks = taskRows.map((task: any) => ({
+        ...task,
+        progressLogs: progressData.filter((log: any) => log.task_id === task.id).slice(0, 3)
+      }))
 
       const { text } = await generateText({
         model: google('gemini-1.5-pro'),
@@ -200,16 +185,16 @@ export class AIService {
     userId: string,
     type: 'TASK_BREAKDOWN' | 'PROGRESS_SUMMARY' | 'STUDY_SUGGESTION' | 'PERFORMANCE_ANALYSIS',
     content: any,
-    metadata?: any
+    metadata?: any,
+    title: string = 'AI Generated Insight'
   ) {
     try {
-      return await prisma.aIInsight.create({
-        data: {
-          userId,
-          type,
-          content,
-          metadata,
-        },
+      return await createAIInsight({
+        userId,
+        insightType: type as InsightType,
+        title,
+        content,
+        metadata,
       })
     } catch (error) {
       console.error('Failed to store AI insight:', error)
@@ -222,14 +207,7 @@ export class AIService {
    */
   async getUserInsights(userId: string, type?: string, limit = 10) {
     try {
-      return await prisma.aIInsight.findMany({
-        where: {
-          userId,
-          ...(type && { type: type as any }),
-        },
-        orderBy: { createdAt: 'desc' },
-        take: limit,
-      })
+      return await getAIInsightsByUser(userId, type as InsightType)
     } catch (error) {
       console.error('Failed to get user insights:', error)
       throw new Error('Failed to get user insights')

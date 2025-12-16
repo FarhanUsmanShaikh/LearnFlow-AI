@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     console.error('Get tasks error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid parameters', details: error.errors },
+        { error: 'Invalid parameters', details: error.issues },
         { status: 400 }
       )
     }
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     console.error('Create task error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: error.issues },
         { status: 400 }
       )
     }
