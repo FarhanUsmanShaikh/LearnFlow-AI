@@ -1,4 +1,4 @@
-# AI Learning Platform
+# LearnFlow AI - AI Learning Platform
 
 A comprehensive EdTech platform that combines intelligent task management with AI-powered insights to enhance learning experiences for students and educators. Built with Next.js 16, TypeScript, MySQL, and Google Gemini AI.
 
@@ -432,23 +432,13 @@ src/
 ## 🚀 Deployment
 
 ### Live Demo
-🌐 **[View Live Demo](https://ai-learning-platform.vercel.app)** (Coming Soon)
+🌐 **[View Live Demo](https://learnflow-ai.up.railway.app/)**
 
-### Vercel Deployment (Recommended)
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy to production
-vercel --prod
-
-# Or deploy with environment variables
-vercel --prod --env DB_HOST=your-db-host --env JWT_SECRET=your-secret
-```
+### Railway Deployment
 
 ### Alternative Deployment Options
 - **Netlify**: Compatible with static export
-- **Railway**: Full-stack deployment with database
+- **Vercel**: Frontend deployment
 - **DigitalOcean**: VPS deployment with Docker
 - **AWS**: EC2 with RDS MySQL database
 
@@ -463,22 +453,6 @@ GOOGLE_GENERATIVE_AI_API_KEY="your-production-gemini-key"
 NODE_ENV="production"
 NEXTAUTH_URL="https://your-domain.com"
 NEXTAUTH_SECRET="your-nextauth-secret"
-```
-
-### Database Setup (Production)
-For production deployment, ensure your MySQL database is properly configured:
-
-```sql
--- Create production database
-CREATE DATABASE ai_learning_platform;
-
--- Create user with proper permissions
-CREATE USER 'ai_platform'@'%' IDENTIFIED BY 'secure_password';
-GRANT ALL PRIVILEGES ON ai_learning_platform.* TO 'ai_platform'@'%';
-FLUSH PRIVILEGES;
-
--- Run the schema
-SOURCE database/enhanced-schema.sql;
 ```
 
 ## 🤝 Contributing
@@ -535,17 +509,16 @@ This project fully meets and exceeds all assignment requirements:
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is created for educational purpose and as a part of SDE assignment.
 
 ## 👨‍💻 Developer
 
 **Farhan Usman Shaikh**  
-*Full Stack Developer & AI Enthusiast*
+*Software Development Engineer and AI Enthusiast*
 
-- 🌐 **GitHub**: [@FarhanUsmanShaikh](https://github.com/FarhanUsmanShaikh)
-- 💼 **LinkedIn**: [Farhan Usman Shaikh](https://linkedin.com/in/farhan-usman-shaikh)
-- 📧 **Email**: farhan.usman.shaikh@example.com
-- 🌍 **Portfolio**: [farhanusmanshaikn.dev](https://farhanusmanshaikn.dev)
+- 🌐 **GitHub**: [@FarhanUsmanShaikh](https://github.com/FarhanUsmanShaikh?tab=repositories)
+- 💼 **LinkedIn**: [Farhan Usman Shaikh](https://www.linkedin.com/in/farhan-shaikh-a0002a2a8)
+- 📧 **Email**: thefarhanshaikh0@gmail.com
 
 ### 🛠️ Technical Skills Demonstrated
 - **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
@@ -555,17 +528,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **DevOps**: Git, Vercel Deployment, Environment Management
 - **Security**: Input Validation, SQL Injection Prevention, Role-Based Access
 
----
-
-## 🙏 Acknowledgments
-
-- **Google Gemini AI** for providing intelligent AI capabilities
-- **Vercel** for excellent Next.js hosting and deployment
-- **Tailwind CSS** for the utility-first CSS framework
-- **Vitest** for modern and fast testing framework
-- **MySQL** for reliable database management
-
----
 
 **Built with ❤️, Logic, and Innovation using Next.js 16, TypeScript, MySQL, and Google Gemini AI**
 
