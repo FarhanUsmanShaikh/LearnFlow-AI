@@ -19,11 +19,36 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { taskId } = taskBreakdownSchema.parse(body)
 
-    // Get the task details
-    const [taskRows] = await db.execute(
-      'SELECT * FROM learning_tasks WHERE id = ? AND (creator_id = ? OR assignee_id = ?) AND archived_at IS NULL',
-      [taskId, user.id, user.id]
-    ) as any[]
+    // Get the task details with proper access control
+    let query: string
+    let params: any[]
+
+    if (user.role === 'ADMIN') {
+      // Admins can access any task
+      query = 'SELECT * FROM learning_tasks WHERE id = ? AND archived_at IS NULL'
+      params = [taskId]
+    } else if (user.role === 'EDUCATOR') {
+      // Educators can access tasks they created
+      query = 'SELECT * FROM learning_tasks WHERE id = ? AND creator_id = ? AND archived_at IS NULL'
+      params = [taskId, user.id]
+    } else {
+      // Students can access:
+      // 1. Tasks specifically assigned to them
+      // 2. Tasks created by educators that are not assigned to anyone (general tasks)
+      query = `
+        SELECT * FROM learning_tasks 
+        WHERE id = ? AND (
+          assignee_id = ? OR 
+          creator_id = ? OR 
+          (assignee_id IS NULL AND creator_id IN (
+            SELECT id FROM users WHERE role = 'EDUCATOR'
+          ))
+        ) AND archived_at IS NULL
+      `
+      params = [taskId, user.id, user.id]
+    }
+
+    const [taskRows] = await db.execute(query, params) as any[]
 
     if (taskRows.length === 0) {
       return NextResponse.json(

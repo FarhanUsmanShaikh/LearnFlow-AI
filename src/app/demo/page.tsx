@@ -332,9 +332,9 @@ export default function DemoPage() {
       </nav>
 
       {/* Demo Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Progress Bar */}
-        <div className="mb-12">
+        <div className="mb-6">
           <div className="card">
             <div className="card-body">
               <div className="flex justify-between items-center mb-4">
@@ -362,20 +362,22 @@ export default function DemoPage() {
         </div>
 
         {/* Current Step */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-6">
           <div className="animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
               {demoSteps[currentStep].title}
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               {demoSteps[currentStep].description}
             </p>
           </div>
         </div>
 
         {/* Step Content */}
-        <div className="mb-12 min-h-[500px] flex items-center justify-center">
-          {demoSteps[currentStep].content}
+        <div className="mb-8 h-[60vh] flex items-center justify-center overflow-hidden">
+          <div className="w-full max-h-full overflow-y-auto">
+            {demoSteps[currentStep].content}
+          </div>
         </div>
 
         {/* Navigation */}

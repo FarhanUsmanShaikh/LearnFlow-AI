@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import SignOutButton from "@/components/SignOutButton"
 import TaskCard from "@/components/TaskCard"
 import CreateTaskModal from "@/components/CreateTaskModal"
+import EditTaskModal from "@/components/EditTaskModal"
 import WelcomeModal from "@/components/WelcomeModal"
 import AIResultModal from "@/components/AIResultModal"
 import type { AuthUser } from '@/lib/auth'
@@ -17,6 +18,8 @@ export default function DashboardClient({ user }: DashboardClientProps) {
   const [tasks, setTasks] = useState<LearningTask[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editingTask, setEditingTask] = useState<LearningTask | null>(null)
   const [aiInsights, setAiInsights] = useState<any[]>([])
   const [isGeneratingInsight, setIsGeneratingInsight] = useState(false)
   const [activeTab, setActiveTab] = useState<'all' | 'todo' | 'progress' | 'done'>('all')
@@ -147,8 +150,8 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
   // Handle task edit
   const handleEditTask = (task: LearningTask) => {
-    // For now, we'll show an alert. You can implement an edit modal later
-    alert(`Edit functionality coming soon!\n\nTask: ${task.title}\nStatus: ${task.status}\nPriority: ${task.priority}`)
+    setEditingTask(task)
+    setIsEditModalOpen(true)
   }
 
   // Handle task delete
@@ -254,7 +257,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  AI Learning Platform
+                  LearnFlow AI - AI Learning Platform
                 </h1>
                 <p className="text-sm text-gray-500">Dashboard</p>
               </div>
@@ -623,6 +626,21 @@ export default function DashboardClient({ user }: DashboardClientProps) {
           fetchTasks()
           setIsCreateModalOpen(false)
         }}
+      />
+
+      {/* Edit Task Modal */}
+      <EditTaskModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setEditingTask(null)
+        }}
+        onTaskUpdated={() => {
+          fetchTasks()
+          setIsEditModalOpen(false)
+          setEditingTask(null)
+        }}
+        task={editingTask}
       />
 
       {/* Welcome Modal */}

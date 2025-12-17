@@ -20,7 +20,6 @@ export default function TaskCard({ task, onProgressUpdate, onAIBreakdown, onEdit
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false)
   
   // Modal states
-  const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const handleProgressUpdate = async () => {
@@ -44,19 +43,16 @@ export default function TaskCard({ task, onProgressUpdate, onAIBreakdown, onEdit
   }
 
   const handleEdit = () => {
-    setShowEditModal(true)
+    if (onEdit) {
+      onEdit(task)
+    }
   }
 
   const handleDelete = () => {
     setShowDeleteModal(true)
   }
 
-  const confirmEdit = () => {
-    if (onEdit) {
-      onEdit(task)
-    }
-    setShowEditModal(false)
-  }
+
 
   const confirmDelete = () => {
     if (onDelete) {
@@ -337,49 +333,7 @@ export default function TaskCard({ task, onProgressUpdate, onAIBreakdown, onEdit
         )}
       </div>
 
-      {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-            <div className="flex items-center mb-4">
-              <svg className="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              <h3 className="text-lg font-semibold text-gray-900">Edit Task</h3>
-            </div>
-            
-            <div className="mb-6">
-              <p className="text-gray-600 mb-2">Task: <span className="font-semibold">{task.title}</span></p>
-              <p className="text-gray-600 mb-2">Status: <span className="font-semibold">{task.status}</span></p>
-              <p className="text-gray-600">Priority: <span className="font-semibold">{task.priority}</span></p>
-            </div>
-            
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <p className="text-blue-800 text-sm">
-                <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Edit functionality is coming soon! This will open a full edit form to modify task details.
-              </p>
-            </div>
-            
-            <div className="flex space-x-3">
-              <button
-                onClick={confirmEdit}
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-              >
-                Continue to Edit
-              </button>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (

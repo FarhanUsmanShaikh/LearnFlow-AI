@@ -1,6 +1,24 @@
+'use client'
+
 import Link from "next/link";
+import { useState, useEffect } from 'react';
+import Loader from '@/components/WelcomeAnimation';
 
 export default function HomePage() {
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  useEffect(() => {
+    const hasSeenWelcome = sessionStorage.getItem('hasSeenWelcome');
+    if (hasSeenWelcome) {
+      setShowWelcome(false);
+    } else {
+      sessionStorage.setItem('hasSeenWelcome', 'true');
+    }
+  }, []);
+
+  if (showWelcome) {
+    return <Loader onComplete={() => setShowWelcome(false)} />;
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Enhanced Navigation */}
@@ -14,7 +32,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                AI Learning Platform
+                LearnFlow AI - AI Learning Platform
               </span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
